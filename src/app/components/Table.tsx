@@ -199,9 +199,10 @@ export default function Table() {
       </div>
       <div className="flex items-center justify-end gap-4 text-sm text-gray-500">
         <span className="text-gray-400">09 de 100</span>
-        <div className="flex gap-1">
+        <div className="flex gap-4">
           <Button
             variant="outline"
+            disabled
             className="h-10 w-20 text-gray-600 border-[#D0D5DA] hover:bg-gray-50 rounded-sm"
           >
             Anterior
