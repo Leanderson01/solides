@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useMobile } from "@/hooks/use-mobile";
+import { useTablet } from "@/hooks/use-tablet";
 
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -13,6 +15,8 @@ import { AddNewDocument } from "./components/AddNewDocument";
 export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const isMobile = useMobile();
+  const isTablet = useTablet();
 
   const handleClearSearch = () => {
     setSearchValue("");
@@ -31,8 +35,8 @@ export default function Home() {
         />
         <main
           className={`flex-1 transition-all duration-300 ${
-            isSidebarOpen ? "ml-64" : "ml-0 p-6"
-          }`}
+            isSidebarOpen && !isMobile && !isTablet ? "ml-64" : ""
+          } ${isMobile || isTablet ? "p-0" : "ml-16 p-6"}`}
         >
           <div className="p-2 md:p-6">
             <div>

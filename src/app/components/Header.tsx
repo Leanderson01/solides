@@ -14,7 +14,7 @@ export default function Header({
   setIsSidebarOpen,
 }: HeaderProps) {
   return (
-    <header className="fixed bg-white border-b z-40 w-full">
+    <header className="fixed bg-white border-b z-[998] md:z-50 w-full">
       <div className="flex items-center justify-between px-4 h-14 py-2">
         <div className="flex items-center flex-1">
           <button
