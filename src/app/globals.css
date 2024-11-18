@@ -94,3 +94,15 @@ h1 {
     @apply bg-background text-foreground;
   }
 }
+
+.fixed {
+  position: fixed;
+}
+
+.bottom-20 {
+  bottom: 5rem;
+}
+
+.right-4 {
+  right: 1rem;
+}
