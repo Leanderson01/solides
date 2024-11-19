@@ -1,19 +1,23 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 
 export function useTablet() {
   const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
-    const checkIfTablet = () => {
-      setIsTablet(window.innerWidth <= 1024);
+    const checkIsTablet = () => {
+      setIsTablet(window.innerWidth >= 640 && window.innerWidth <= 1024);
     };
 
-    checkIfTablet();
-    window.addEventListener("resize", checkIfTablet);
+    // Verificação inicial
+    checkIsTablet();
 
-    return () => {
-      window.removeEventListener("resize", checkIfTablet);
-    };
+    // Adiciona listener para mudanças de tamanho
+    window.addEventListener("resize", checkIsTablet);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", checkIsTablet);
   }, []);
 
   return isTablet;

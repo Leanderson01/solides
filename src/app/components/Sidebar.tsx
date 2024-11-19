@@ -2,6 +2,14 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { useMobile } from "@/hooks/use-mobile";
+import { useTablet } from "@/hooks/use-tablet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -9,35 +17,67 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={onClose}
-        />
-      )}
-      <aside
-        className={`
-          fixed top-14 left-0 bottom-0 bg-[hsl(var(--sidebar-background))] border-r z-30 
-          transition-all duration-300 ease-in-out overflow-y-auto
-          ${isOpen ? "w-64" : "w-0"}
-        `}
-      >
-        <div className="flex flex-col h-full py-4">
-          <div className="px-3 py-2">
-            <div className="space-y-1">
+  const isMobile = useMobile();
+  const isTablet = useTablet();
+  const shouldUseSheet = isMobile || isTablet;
+
+  if (shouldUseSheet) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent
+          side="left"
+          className="w-full p-0 mt-14 border-t"
+          hideCloseButton
+        >
+          <SheetHeader className="px-3 py-2">
+            <SheetTitle>
               <SidebarItem
                 icon="/file-side.svg"
                 title="Documentos"
                 isActive={true}
-                isOpen={isOpen}
+                isOpen={true}
               />
+            </SheetTitle>
+          </SheetHeader>
+          {/* <div className="flex flex-col h-full py-4">
+            <div className="px-3 py-2">
+              <div className="space-y-1">
+                <SidebarItem
+                  icon="/file-side.svg"
+                  title="Documentos"
+                  isActive={true}
+                  isOpen={true}
+                />
+              </div>
             </div>
+          </div> */}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <aside
+      className={`
+        fixed top-14 left-0 bottom-0 bg-[hsl(var(--sidebar-background))] border-r z-30 
+        transition-all duration-300 ease-in-out overflow-y-auto
+        hidden lg:block
+        ${isOpen ? "w-64" : "w-16"}
+      `}
+    >
+      <div className="flex flex-col h-full py-4">
+        <div className="px-3 py-2">
+          <div className="space-y-1">
+            <SidebarItem
+              icon="/file-side.svg"
+              title="Documentos"
+              isActive={true}
+              isOpen={isOpen}
+            />
           </div>
         </div>
-      </aside>
-    </>
+      </div>
+    </aside>
   );
 }
 
@@ -52,11 +92,11 @@ function SidebarItem({ icon, title, isActive, isOpen }: SidebarItemProps) {
   return (
     <button
       className={`
-        w-full flex items-center gap-3 px-3 py-1 rounded-md
+        w-full flex items-center gap-3 rounded-md
         transition-colors
         ${
           isActive
-            ? "bg-green-100 text-black hover:bg-green-200"
+            ? "bg-green-200 text-black hover:bg-green-300"
             : "hover:bg-gray-200"
         }
         ${!isOpen && "justify-center"}
@@ -66,12 +106,12 @@ function SidebarItem({ icon, title, isActive, isOpen }: SidebarItemProps) {
         className={`
           flex items-center justify-center
           ${isActive ? "text-black" : "text-gray-500"}
-          ${!isOpen ? "w-8 h-8" : "w-10 h-10"}
+          ${!isOpen ? "w-8 h-8" : "w-8 h-8"}
         `}
       >
-        <Image src={icon} alt={title} width={24} height={24} />
+        <Image src={icon} alt={title} width={20} height={20} />
       </div>
-      {isOpen && <span className="text-sm font-medium">{title}</span>}
+      {isOpen && <span className="text-sm font-normal">{title}</span>}
     </button>
   );
 }

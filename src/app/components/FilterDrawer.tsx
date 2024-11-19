@@ -33,7 +33,7 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-[440px]">
+      <SheetContent className="w-full sm:max-w-[440px] z-[999]">
         <SheetHeader>
           <SheetTitle>Filtrar documentos</SheetTitle>
           <p className="text-sm text-gray-500">
