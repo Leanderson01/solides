@@ -10,10 +10,8 @@ export function useTablet() {
       setIsTablet(window.innerWidth >= 640 && window.innerWidth <= 1024);
     };
 
-    // Verificação inicial
     checkIsTablet();
 
-    // Adiciona listener para mudanças de tamanho
     window.addEventListener("resize", checkIsTablet);
 
     // Cleanup

@@ -17,11 +17,14 @@ const SheetPortal = SheetPrimitive.Portal;
 
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay> & {
+    overlay?: boolean;
+  }
+>(({ className, overlay = true, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-[999] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      overlay && "bg-black/70",
       className
     )}
     {...props}
@@ -53,6 +56,7 @@ interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {
   hideCloseButton?: boolean;
+  overlay?: boolean;
 }
 
 const SheetContent = React.forwardRef<
@@ -60,11 +64,18 @@ const SheetContent = React.forwardRef<
   SheetContentProps
 >(
   (
-    { side = "right", className, children, hideCloseButton = false, ...props },
+    {
+      side = "right",
+      className,
+      children,
+      hideCloseButton = false,
+      overlay = true,
+      ...props
+    },
     ref
   ) => (
     <SheetPortal>
-      <SheetOverlay />
+      <SheetOverlay overlay={overlay} />
       <SheetPrimitive.Content
         ref={ref}
         className={cn(sheetVariants({ side }), className)}
