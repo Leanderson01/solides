@@ -13,6 +13,7 @@ import Footer from "./components/Footer";
 import SearchDocuments from "./components/SearchDocuments";
 import { AddNewDocument } from "./components/AddNewDocument";
 import { useFilterStore } from "@/store/use-filter-store";
+import { useMutationStore } from "@/store/use-mutation-store";
 
 export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -23,6 +24,8 @@ export default function Home() {
 
   const { date, documentType, emitter, tributeValue, liquidValue } =
     useFilterStore();
+
+  const { shouldRefetch, setShouldRefetch } = useMutationStore();
 
   const isMobile = useMobile();
   const isTablet = useTablet();
@@ -67,6 +70,10 @@ export default function Home() {
 
         const data = await response.json();
         setDocuments(data.documents);
+
+        if (shouldRefetch) {
+          setShouldRefetch(false);
+        }
       } catch (error) {
         console.error("Erro ao buscar documentos:", error);
       }
@@ -81,6 +88,8 @@ export default function Home() {
     emitter,
     tributeValue,
     liquidValue,
+    shouldRefetch,
+    setShouldRefetch,
   ]);
 
   const handleClearSearch = () => {

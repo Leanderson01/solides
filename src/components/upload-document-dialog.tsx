@@ -24,6 +24,7 @@ import {
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useMutationStore } from "@/store/use-mutation-store";
 
 interface UploadDocumentDialogProps {
   open: boolean;
@@ -40,6 +41,7 @@ export function UploadDocumentDialog({
   const [uploadedSize, setUploadedSize] = useState(0);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const setShouldRefetch = useMutationStore((state) => state.setShouldRefetch);
 
   const {
     register,
@@ -136,6 +138,7 @@ export function UploadDocumentDialog({
       console.log("Resposta do servidor:", responseData);
 
       toast.success("Documento adicionado com sucesso!");
+      setShouldRefetch(true);
       onOpenChange(false);
     } catch (error) {
       console.error("Erro ao enviar documento:", error);
