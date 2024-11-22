@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
 import { useFilterStore } from "@/store/use-filter-store";
 import { formatDate } from "date-fns";
+import { useState, useEffect } from "react";
 
 type FilterDrawerProps = {
   children: React.ReactNode;
@@ -45,6 +46,43 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
     setLiquidValue,
     clearFilters,
   } = useFilterStore();
+
+  const [displayTributeValue, setDisplayTributeValue] = useState("");
+  const [displayLiquidValue, setDisplayLiquidValue] = useState("");
+
+  const handleValueChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "tributeValue" | "liquidValue"
+  ) => {
+    const inputValue = e.target.value;
+    const numericValue = inputValue.replace(/\D/g, "");
+
+    let formattedValue = "";
+    if (numericValue) {
+      const value = Number(numericValue) / 100;
+      formattedValue = value.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      });
+    }
+
+    if (field === "tributeValue") {
+      setDisplayTributeValue(formattedValue);
+      setTributeValue(formattedValue);
+    } else {
+      setDisplayLiquidValue(formattedValue);
+      setLiquidValue(formattedValue);
+    }
+  };
+
+  useEffect(() => {
+    if (tributeValue) {
+      setDisplayTributeValue(tributeValue);
+    }
+    if (liquidValue) {
+      setDisplayLiquidValue(liquidValue);
+    }
+  }, [tributeValue, liquidValue]);
 
   return (
     <Sheet>
@@ -99,14 +137,19 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
             <label className="text-sm font-bold mb-2 block">
               Tipo de documento
             </label>
-            <Select value={documentType} onValueChange={setDocumentType}>
+            <Select
+              value={documentType}
+              onValueChange={setDocumentType}
+              defaultValue="all"
+            >
               <SelectTrigger className="h-10">
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="nfs">Nota fiscal de serviço</SelectItem>
+                <SelectItem value="relatorio">Relatório</SelectItem>
                 <SelectItem value="contrato">Contrato</SelectItem>
+                <SelectItem value="nota-fiscal">Nota fiscal</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -127,9 +170,14 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
               </label>
               <Input
                 className="h-10 placeholder:text-[#9CA3AF]"
-                placeholder="Valor em R$"
-                value={tributeValue}
-                onChange={(e) => setTributeValue(e.target.value)}
+                placeholder="R$ 0,00"
+                value={displayTributeValue}
+                onChange={(e) => handleValueChange(e, "tributeValue")}
+                onKeyPress={(e) => {
+                  if (!/[\d\b]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
               />
             </div>
 
@@ -139,9 +187,14 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
               </label>
               <Input
                 className="h-10 placeholder:text-[#9CA3AF]"
-                placeholder="Valor em R$"
-                value={liquidValue}
-                onChange={(e) => setLiquidValue(e.target.value)}
+                placeholder="R$ 0,00"
+                value={displayLiquidValue}
+                onChange={(e) => handleValueChange(e, "liquidValue")}
+                onKeyPress={(e) => {
+                  if (!/[\d\b]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
               />
             </div>
           </div>
