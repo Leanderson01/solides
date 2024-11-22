@@ -19,7 +19,19 @@ import {
 import { useState } from "react";
 import { UploadDocumentDialog } from "@/components/upload-document-dialog";
 
-export default function Filters() {
+interface FiltersProps {
+  origin: string;
+  type: string;
+  onOriginChange: (value: string) => void;
+  onTypeChange: (value: string) => void;
+}
+
+export default function Filters({
+  origin,
+  type,
+  onOriginChange,
+  onTypeChange,
+}: FiltersProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -48,12 +60,14 @@ export default function Filters() {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <Select defaultValue="digitalizado">
+          <Select value={origin} onValueChange={onOriginChange}>
             <SelectTrigger className="w-full lg:w-80 h-10">
               <SelectValue placeholder="Origem do documento" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="digitalizado">Digitalizado</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="interno">Interno</SelectItem>
+              <SelectItem value="externo">Externo</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -80,14 +94,15 @@ export default function Filters() {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <Select defaultValue="nota-fiscal">
+          <Select value={type} onValueChange={onTypeChange}>
             <SelectTrigger className="w-full lg:w-80 h-10">
               <SelectValue placeholder="Tipo documental" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="nota-fiscal">
-                Nota fiscal de serviço
-              </SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="contrato">Contrato</SelectItem>
+              <SelectItem value="nota-fiscal">Nota Fiscal</SelectItem>
+              <SelectItem value="relatorio">Relatório</SelectItem>
             </SelectContent>
           </Select>
         </div>

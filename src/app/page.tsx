@@ -16,6 +16,8 @@ import { AddNewDocument } from "./components/AddNewDocument";
 export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [origin, setOrigin] = useState("all");
+  const [type, setType] = useState("all");
   const [documents, setDocuments] = useState<Document[]>([]);
   const isMobile = useMobile();
   const isTablet = useTablet();
@@ -26,6 +28,12 @@ export default function Home() {
         const searchParams = new URLSearchParams();
         if (searchValue) {
           searchParams.append("search", searchValue);
+        }
+        if (origin && origin !== "all") {
+          searchParams.append("origin", origin);
+        }
+        if (type && type !== "all") {
+          searchParams.append("type", type);
         }
 
         const response = await fetch(
@@ -40,11 +48,10 @@ export default function Home() {
         setDocuments(data.documents);
       } catch (error) {
         console.error("Erro ao buscar documentos:", error);
-      } finally {
       }
     };
     fetchDocuments();
-  }, [searchValue]);
+  }, [searchValue, origin, type]);
 
   const handleClearSearch = () => {
     setSearchValue("");
@@ -82,7 +89,12 @@ export default function Home() {
                 />
               </div>
               <div className="w-full h-px bg-gray-200 my-6" />
-              <Filters />
+              <Filters
+                origin={origin}
+                type={type}
+                onOriginChange={setOrigin}
+                onTypeChange={setType}
+              />
               <Table documents={documents} />
             </div>
           </div>
