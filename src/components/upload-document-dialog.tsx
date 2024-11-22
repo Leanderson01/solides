@@ -23,6 +23,7 @@ import {
 } from "@/lib/validations/document";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface UploadDocumentDialogProps {
   open: boolean;
@@ -126,14 +127,14 @@ export function UploadDocumentDialog({
     console.log("Formulário submetido", data);
 
     if (!file) {
-      alert("Por favor, selecione um arquivo");
+      toast.error("Por favor, selecione um arquivo");
       return;
     }
 
     try {
       const formData = {
         ...data,
-        fileUrl: URL.createObjectURL(file),
+        fileUrl: file.name,
         fileSize: file.size,
       };
 
@@ -155,9 +156,11 @@ export function UploadDocumentDialog({
       const responseData = await response.json();
       console.log("Resposta do servidor:", responseData);
 
+      toast.success("Documento adicionado com sucesso!");
       onOpenChange(false);
     } catch (error) {
       console.error("Erro ao enviar documento:", error);
+      toast.error("Erro ao criar documento");
     }
   };
 
