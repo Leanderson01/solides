@@ -18,6 +18,7 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useTablet } from "@/hooks/use-tablet";
 import { Document } from "@prisma/client";
 import { toast } from "sonner";
+import { PreviewDocumentDialog } from "@/components/preview-document-dialog";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -55,6 +56,8 @@ export default function Table({
 }) {
   const isMobile = useMobile();
   const isTablet = useTablet();
+
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirections, setSortDirections] = useState<
@@ -67,6 +70,7 @@ export default function Table({
     dataCriacao: null,
     ultimaAtualizacao: null,
   });
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const handleSort = (field: SortField) => {
     setSortDirections((prev) => {
@@ -166,183 +170,215 @@ export default function Table({
     }
   };
 
+  const handlePreviewDocument = (doc: Document) => {
+    console.log("Documento para preview:", {
+      id: doc.id,
+      name: doc.name,
+      url: doc.fileUrl,
+    });
+
+    const previewUrl = doc.fileUrl.startsWith("http")
+      ? doc.fileUrl
+      : `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/raw/upload/${doc.fileUrl}`;
+
+    setPreviewUrl(previewUrl);
+    setIsPreviewOpen(true);
+  };
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="border rounded-lg">
-        <div className="overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
-          <table className="w-full min-w-[900px]">
-            <thead className="sticky top-0 bg-white z-10">
-              <tr className="border-b text-sm">
-                <th className="w-[48px] py-3 px-2 md:block hidden"></th>
-                <th className="text-left text-sm font-medium md:text-base py-3 px-4">
-                  <SortButton field="name" label="Nome do documento" />
-                </th>
-                <th className="text-left text-sm font-medium md:text-base py-3 px-4">
-                  <SortButton field="emitente" label="Emitente" />
-                </th>
-                <th className="text-left text-sm font-medium md:text-base py-3 px-4">
-                  <SortButton
-                    field="valorTributos"
-                    label="Valor total dos tributos"
-                  />
-                </th>
-                <th className="text-left text-sm font-medium md:text-base py-3 px-4">
-                  <SortButton field="valorLiquido" label="Valor líquido" />
-                </th>
-                <th className="text-left text-sm font-medium md:text-base py-3 px-4">
-                  <SortButton field="dataCriacao" label="Data de criação" />
-                </th>
-                <th className="text-left text-sm font-medium md:text-base py-3 px-4">
-                  <SortButton
-                    field="ultimaAtualizacao"
-                    label="Última atualização"
-                  />
-                </th>
-                <th className="w-[40px]"></th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {sortedData.map((doc, i) => (
-                <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
-                  <td className="py-3 px-4 md:block hidden">
-                    {!isMobile ? (
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300"
-                        checked={selectedItems.includes(doc.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedItems([...selectedItems, doc.id]);
-                          } else {
-                            setSelectedItems(
-                              selectedItems.filter((item) => item !== doc.id)
-                            );
-                          }
-                        }}
-                      />
-                    ) : null}
-                  </td>
-                  <td className="py-3 px-4 w-full md:w-auto whitespace-nowrap md:whitespace-normal">
-                    <div className="flex items-center">
-                      <Image
-                        src="/file.svg"
-                        alt="File icon"
-                        width={24}
-                        height={24}
-                        className="mr-2"
-                      />
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500">{doc.id}</span>
-                        <span className="text-sm">{doc.name}</span>
+    <>
+      <div className="flex flex-col h-full">
+        <div className="border rounded-lg">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
+            <table className="w-full min-w-[900px]">
+              <thead className="sticky top-0 bg-white z-10">
+                <tr className="border-b text-sm">
+                  <th className="w-[48px] py-3 px-2 md:block hidden"></th>
+                  <th className="text-left text-sm font-medium md:text-base py-3 px-4">
+                    <SortButton field="name" label="Nome do documento" />
+                  </th>
+                  <th className="text-left text-sm font-medium md:text-base py-3 px-4">
+                    <SortButton field="emitente" label="Emitente" />
+                  </th>
+                  <th className="text-left text-sm font-medium md:text-base py-3 px-4">
+                    <SortButton
+                      field="valorTributos"
+                      label="Valor total dos tributos"
+                    />
+                  </th>
+                  <th className="text-left text-sm font-medium md:text-base py-3 px-4">
+                    <SortButton field="valorLiquido" label="Valor líquido" />
+                  </th>
+                  <th className="text-left text-sm font-medium md:text-base py-3 px-4">
+                    <SortButton field="dataCriacao" label="Data de criação" />
+                  </th>
+                  <th className="text-left text-sm font-medium md:text-base py-3 px-4">
+                    <SortButton
+                      field="ultimaAtualizacao"
+                      label="Última atualização"
+                    />
+                  </th>
+                  <th className="w-[40px]"></th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {sortedData.map((doc, i) => (
+                  <tr
+                    key={i}
+                    className="border-b last:border-0 hover:bg-gray-50"
+                  >
+                    <td className="py-3 px-4 md:block hidden">
+                      {!isMobile ? (
+                        <input
+                          type="checkbox"
+                          className="rounded border-gray-300"
+                          checked={selectedItems.includes(doc.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedItems([...selectedItems, doc.id]);
+                            } else {
+                              setSelectedItems(
+                                selectedItems.filter((item) => item !== doc.id)
+                              );
+                            }
+                          }}
+                        />
+                      ) : null}
+                    </td>
+                    <td className="py-3 px-4 w-full md:w-auto whitespace-nowrap md:whitespace-normal">
+                      <div className="flex items-center">
+                        <Image
+                          src="/file.svg"
+                          alt="File icon"
+                          width={24}
+                          height={24}
+                          className="mr-2"
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-500">
+                            {doc.id}
+                          </span>
+                          <span className="text-sm">{doc.name}</span>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">{doc.emitter}</td>
-                  <td className="py-3 px-4">{doc.tributeValue}</td>
-                  <td className="py-3 px-4">{doc.liquidValue}</td>
-                  <td className="py-3 px-4">{formatDate(doc.createdAt)}</td>
-                  <td className="py-3 px-4">{formatDate(doc.updatedAt)}</td>
-                  <td className="py-3 px-4 relative">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="flex items-center">
-                          <Eye className="w-4 h-4 mr-2" />
-                          Visualizar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="flex items-center text-red-600 focus:text-red-600 cursor-pointer"
-                          onClick={() => handleDeleteDocument(doc.id)}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Excluir documento
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            {!isMobile && !isTablet && (
-              <tfoot className="bg-gray-50">
-                <tr className="text-sm">
-                  <td colSpan={2} className="py-3 px-4">
-                    <div className="flex flex-col">
-                      <span className="text-gray-500">Total</span>
-                      <span>{documents.length} documentos</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex flex-col">
-                      <span className="text-gray-500">nº de emitentes</span>
-                      <span>
-                        {new Set(documents.map((doc) => doc.emitter)).size}{" "}
-                        emitentes
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex flex-col">
-                      <span className="text-gray-500">Total de tributos</span>
-                      <span>
-                        {`R$ ${documents
-                          .reduce(
-                            (acc, doc) =>
-                              acc + cleanNumberString(doc.tributeValue),
-                            0
-                          )
-                          .toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                          })}`}
-                      </span>
-                    </div>
-                  </td>
-                  <td colSpan={4} className="py-3 px-4">
-                    <div className="flex flex-col">
-                      <span className="text-gray-500">Total valor líquido</span>
-                      <span>
-                        {`R$ ${documents
-                          .reduce(
-                            (acc, doc) =>
-                              acc + cleanNumberString(doc.liquidValue),
-                            0
-                          )
-                          .toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                          })}`}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              </tfoot>
-            )}
-          </table>
+                    </td>
+                    <td className="py-3 px-4">{doc.emitter}</td>
+                    <td className="py-3 px-4">{doc.tributeValue}</td>
+                    <td className="py-3 px-4">{doc.liquidValue}</td>
+                    <td className="py-3 px-4">{formatDate(doc.createdAt)}</td>
+                    <td className="py-3 px-4">{formatDate(doc.updatedAt)}</td>
+                    <td className="py-3 px-4 relative">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            className="flex items-center cursor-pointer"
+                            onClick={() => handlePreviewDocument(doc)}
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            Visualizar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="flex items-center text-red-600 focus:text-red-600 cursor-pointer"
+                            onClick={() => handleDeleteDocument(doc.id)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Excluir documento
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              {!isMobile && !isTablet && (
+                <tfoot className="bg-gray-50">
+                  <tr className="text-sm">
+                    <td colSpan={2} className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-gray-500">Total</span>
+                        <span>{documents.length} documentos</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-gray-500">nº de emitentes</span>
+                        <span>
+                          {new Set(documents.map((doc) => doc.emitter)).size}{" "}
+                          emitentes
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-gray-500">Total de tributos</span>
+                        <span>
+                          {`R$ ${documents
+                            .reduce(
+                              (acc, doc) =>
+                                acc + cleanNumberString(doc.tributeValue),
+                              0
+                            )
+                            .toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                            })}`}
+                        </span>
+                      </div>
+                    </td>
+                    <td colSpan={4} className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-gray-500">
+                          Total valor líquido
+                        </span>
+                        <span>
+                          {`R$ ${documents
+                            .reduce(
+                              (acc, doc) =>
+                                acc + cleanNumberString(doc.liquidValue),
+                              0
+                            )
+                            .toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                            })}`}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-4 text-sm text-gray-500 mt-4">
+          <span className="text-gray-400 hidden lg:block">
+            {documents.length} de {documents.length}
+          </span>
+          <div className="flex gap-4 w-full lg:w-auto ">
+            <Button
+              variant="outline"
+              disabled
+              className="h-10 w-full lg:w-20 text-gray-600 border-[#D0D5DA] hover:bg-gray-50 rounded-sm"
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              className="h-10 w-full lg:w-20 text-gray-600 border-[#D0D5DA] hover:bg-gray-50 rounded-sm"
+            >
+              Próximo
+            </Button>
+          </div>
         </div>
       </div>
-      <div className="flex items-center justify-end gap-4 text-sm text-gray-500 mt-4">
-        <span className="text-gray-400 hidden lg:block">
-          {documents.length} de {documents.length}
-        </span>
-        <div className="flex gap-4 w-full lg:w-auto ">
-          <Button
-            variant="outline"
-            disabled
-            className="h-10 w-full lg:w-20 text-gray-600 border-[#D0D5DA] hover:bg-gray-50 rounded-sm"
-          >
-            Anterior
-          </Button>
-          <Button
-            variant="outline"
-            className="h-10 w-full lg:w-20 text-gray-600 border-[#D0D5DA] hover:bg-gray-50 rounded-sm"
-          >
-            Próximo
-          </Button>
-        </div>
-      </div>
-    </div>
+      <PreviewDocumentDialog
+        open={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+        fileUrl={previewUrl}
+      />
+    </>
   );
 }

@@ -109,28 +109,19 @@ export function UploadDocumentDialog({
   };
 
   const onSubmit = async (data: DocumentFormData) => {
-    console.log("Formulário submetido", data);
-
     if (!file) {
       toast.error("Por favor, selecione um arquivo");
       return;
     }
 
     try {
-      const formData = {
-        ...data,
-        fileUrl: file.name,
-        fileSize: file.size,
-      };
-
-      console.log("Dados a serem enviados:", formData);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("data", JSON.stringify(data));
 
       const response = await fetch("/api/documents", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: formData,
       });
 
       if (!response.ok) {

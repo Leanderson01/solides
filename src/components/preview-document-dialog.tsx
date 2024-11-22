@@ -15,29 +15,44 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pd
 interface PreviewDocumentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  file: File;
+  file?: File;
+  fileUrl?: string;
 }
 
 export function PreviewDocumentDialog({
   open,
   onOpenChange,
   file,
+  fileUrl,
 }: PreviewDocumentDialogProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
-  const [pdfUrl, setPdfUrl] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+
+  const documentUrl = file
+    ? URL.createObjectURL(file)
+    : fileUrl?.includes("cloudinary")
+    ? fileUrl
+    : fileUrl;
 
   useEffect(() => {
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setPdfUrl(url);
-      return () => URL.revokeObjectURL(url);
+    if (open) {
+      setError(null);
+      console.log("URL do documento:", documentUrl);
     }
-  }, [file]);
+  }, [open, documentUrl]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
+    setError(null);
+  };
+
+  const onDocumentLoadError = (error: Error) => {
+    console.error("Erro ao carregar PDF:", error);
+    setError(
+      "Não foi possível carregar o documento. Por favor, tente novamente."
+    );
   };
 
   const changePage = (offset: number) => {
@@ -63,7 +78,7 @@ export function PreviewDocumentDialog({
               <DialogTitle className="text-lg font-semibold">
                 Pré-visualização do arquivo
               </DialogTitle>
-              <p className="text-sm text-gray-500">{file.name}</p>
+              <p className="text-sm text-gray-500">{file?.name}</p>
             </div>
           </div>
           <div className="flex items-center justify-between p-2 border-b bg-white">
@@ -142,8 +157,8 @@ export function PreviewDocumentDialog({
                 className="h-8 w-8"
                 onClick={() => {
                   const link = document.createElement("a");
-                  link.href = pdfUrl;
-                  link.download = file.name;
+                  link.href = file ? URL.createObjectURL(file) : fileUrl || "";
+                  link.download = file?.name || "";
                   link.click();
                 }}
               >
@@ -155,24 +170,31 @@ export function PreviewDocumentDialog({
 
         <div className="flex-1 overflow-auto bg-gray-100 p-4">
           <div className="flex justify-center min-h-full">
-            <Document
-              file={pdfUrl}
-              onLoadSuccess={onDocumentLoadSuccess}
-              options={{
-                cMapUrl:
-                  "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/cmaps/",
-                cMapPacked: true,
-                standardFontDataUrl:
-                  "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/standard_fonts/",
-              }}
-            >
-              <Page
-                pageNumber={pageNumber}
-                scale={scale}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-              />
-            </Document>
+            {error ? (
+              <div className="flex items-center justify-center text-red-500">
+                {error}
+              </div>
+            ) : (
+              <Document
+                file={documentUrl}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+                options={{
+                  cMapUrl:
+                    "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/cmaps/",
+                  cMapPacked: true,
+                  standardFontDataUrl:
+                    "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/standard_fonts/",
+                }}
+              >
+                <Page
+                  pageNumber={pageNumber}
+                  scale={scale}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                />
+              </Document>
+            )}
           </div>
         </div>
 
