@@ -21,6 +21,8 @@ export default function Home() {
   const [origin, setOrigin] = useState("all");
   const [type, setType] = useState("all");
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
   const { date, documentType, emitter, tributeValue, liquidValue } =
@@ -32,10 +34,14 @@ export default function Home() {
   const isTablet = useTablet();
 
   useEffect(() => {
-    const fetchDocuments = async () => {
+    const fetchDocuments = async (page: number) => {
       setIsLoading(true);
       try {
-        const searchParams = new URLSearchParams();
+        const searchParams = new URLSearchParams({
+          page: page.toString(),
+          limit: "10",
+        });
+
         if (searchValue) {
           searchParams.append("search", searchValue);
         }
@@ -45,7 +51,6 @@ export default function Home() {
         if (type && type !== "all") {
           searchParams.append("type", type);
         }
-
         if (date) {
           searchParams.append("date", date);
         }
@@ -72,6 +77,8 @@ export default function Home() {
 
         const data = await response.json();
         setDocuments(data.documents);
+        setTotalPages(data.totalPages);
+        setCurrentPage(data.currentPage);
 
         if (shouldRefetch) {
           setShouldRefetch(false);
@@ -82,8 +89,9 @@ export default function Home() {
         setIsLoading(false);
       }
     };
-    fetchDocuments();
+    fetchDocuments(currentPage);
   }, [
+    currentPage,
     searchValue,
     origin,
     type,
@@ -96,8 +104,13 @@ export default function Home() {
     setShouldRefetch,
   ]);
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const handleClearSearch = () => {
     setSearchValue("");
+    setCurrentPage(1);
   };
 
   const handleDeleteDocument = (deletedId: string) => {
@@ -149,6 +162,9 @@ export default function Home() {
                 documents={documents}
                 onDeleteDocument={handleDeleteDocument}
                 isLoading={isLoading}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
               />
             </div>
           </div>

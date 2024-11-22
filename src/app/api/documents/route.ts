@@ -23,6 +23,9 @@ export async function GET(request: Request) {
     const emitter = searchParams.get("emitter");
     const tributeValue = searchParams.get("tributeValue");
     const liquidValue = searchParams.get("liquidValue");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
 
     const whereClause: Prisma.DocumentWhereInput = {
       AND: [
@@ -63,11 +66,19 @@ export async function GET(request: Request) {
       ],
     };
 
+    // Buscar total de documentos
+    const totalDocuments = await prisma.document.count({
+      where: whereClause,
+    });
+
+    // Buscar documentos com paginação
     let documents = await prisma.document.findMany({
       where: whereClause,
       orderBy: {
         createdAt: "desc",
       },
+      skip,
+      take: limit,
     });
 
     if (
@@ -135,7 +146,12 @@ export async function GET(request: Request) {
       updatedAt: doc.updatedAt.toISOString(),
     }));
 
-    return NextResponse.json({ documents: safeDocuments });
+    return NextResponse.json({
+      documents: safeDocuments,
+      totalPages: Math.ceil(totalDocuments / limit),
+      currentPage: page,
+      totalDocuments,
+    });
   } catch (error) {
     console.error("Erro na rota:", error);
     return NextResponse.json(

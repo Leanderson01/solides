@@ -52,12 +52,18 @@ interface TableProps {
   documents: Document[];
   onDeleteDocument: (id: string) => void;
   isLoading?: boolean;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
 export default function Table({
   documents,
   onDeleteDocument,
   isLoading = false,
+  currentPage,
+  totalPages,
+  onPageChange,
 }: TableProps) {
   const isMobile = useMobile();
   const isTablet = useTablet();
@@ -186,6 +192,18 @@ export default function Table({
 
     setPreviewUrl(previewUrl);
     setIsPreviewOpen(true);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
   };
 
   if (isLoading) {
@@ -403,18 +421,21 @@ export default function Table({
         {documents.length > 0 && (
           <div className="flex items-center justify-end gap-4 text-sm text-gray-500 mt-4">
             <span className="text-gray-400 hidden lg:block">
-              {documents.length} de {documents.length}
+              Página {currentPage} de {totalPages}
             </span>
-            <div className="flex gap-4 w-full lg:w-auto ">
+            <div className="flex gap-4 w-full lg:w-auto">
               <Button
                 variant="outline"
-                disabled
+                disabled={currentPage === 1}
+                onClick={handlePreviousPage}
                 className="h-10 w-full lg:w-20 text-gray-600 border-[#D0D5DA] hover:bg-gray-50 rounded-sm"
               >
                 Anterior
               </Button>
               <Button
                 variant="outline"
+                disabled={currentPage >= totalPages}
+                onClick={handleNextPage}
                 className="h-10 w-full lg:w-20 text-gray-600 border-[#D0D5DA] hover:bg-gray-50 rounded-sm"
               >
                 Próximo
