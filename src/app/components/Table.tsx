@@ -17,6 +17,7 @@ import Image from "next/image";
 import { useMobile } from "@/hooks/use-mobile";
 import { useTablet } from "@/hooks/use-tablet";
 import { Document } from "@prisma/client";
+import { toast } from "sonner";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -45,7 +46,13 @@ const cleanNumberString = (value: string): number => {
   return parseFloat(cleanValue) || 0;
 };
 
-export default function Table({ documents }: { documents: Document[] }) {
+export default function Table({
+  documents,
+  onDeleteDocument,
+}: {
+  documents: Document[];
+  onDeleteDocument: (id: string) => void;
+}) {
   const isMobile = useMobile();
   const isTablet = useTablet();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -141,6 +148,24 @@ export default function Table({ documents }: { documents: Document[] }) {
     }
   });
 
+  const handleDeleteDocument = async (id: string) => {
+    try {
+      const response = await fetch(`/api/documents?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao excluir documento");
+      }
+
+      onDeleteDocument(id);
+      toast.success("Documento excluído com sucesso");
+    } catch (error) {
+      console.error("Erro ao excluir documento:", error);
+      toast.error("Erro ao excluir documento");
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="border rounded-lg">
@@ -229,7 +254,10 @@ export default function Table({ documents }: { documents: Document[] }) {
                           <Eye className="w-4 h-4 mr-2" />
                           Visualizar
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="flex items-center">
+                        <DropdownMenuItem
+                          className="flex items-center text-red-600 focus:text-red-600 cursor-pointer"
+                          onClick={() => handleDeleteDocument(doc.id)}
+                        >
                           <Trash2 className="w-4 h-4 mr-2" />
                           Excluir documento
                         </DropdownMenuItem>

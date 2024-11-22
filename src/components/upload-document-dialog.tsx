@@ -72,27 +72,12 @@ export function UploadDocumentDialog({
 
   const simulateUpload = (file: File) => {
     setIsUploading(true);
-    setUploadedSize(0);
-    setUploadProgress(0);
+    setUploadedSize(file.size);
+    setUploadProgress(100);
 
-    const totalSize = file.size;
-    const interval = setInterval(() => {
-      setUploadedSize((current) => {
-        const newSize = current + totalSize * 0.1;
-        const progress = (newSize / totalSize) * 100;
-
-        setUploadProgress(Math.min(progress, 100));
-
-        if (progress >= 100) {
-          clearInterval(interval);
-          setIsUploading(false);
-          return totalSize;
-        }
-        return newSize;
-      });
-    }, 500);
-
-    return () => clearInterval(interval);
+    setTimeout(() => {
+      setIsUploading(false);
+    }, 100);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,7 +154,7 @@ export function UploadDocumentDialog({
   };
 
   const formatCurrency = (value: string) => {
-    let numbers = value.replace(/\D/g, "");
+    const numbers = value.replace(/\D/g, "");
 
     const amount = Number(numbers) / 100;
 
@@ -271,7 +256,6 @@ export function UploadDocumentDialog({
                     placeholder="R$ 0,00"
                     onChange={(e) => handleCurrencyInput(e, "liquidValue")}
                     onKeyPress={(e) => {
-                      // Permite apenas números e teclas de controle
                       if (!/[\d\b]/.test(e.key)) {
                         e.preventDefault();
                       }
@@ -341,11 +325,14 @@ export function UploadDocumentDialog({
               {!file ? (
                 <div
                   className="border border-dashed border-green-500 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
-                  onDragOver={(e) => e.preventDefault()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                   onDrop={handleDrop}
-                  onClick={() =>
-                    document.getElementById("file-upload")?.click()
-                  }
+                  onClick={() => {
+                    document.getElementById("file-upload")?.click();
+                  }}
                 >
                   <div className="flex flex-col items-center gap-2">
                     <Image
@@ -357,7 +344,16 @@ export function UploadDocumentDialog({
                     <p className="text-sm text-gray-600">
                       Arraste e solte aqui ou selecione o arquivo para upload
                     </p>
-                    <Button variant="outline" size="sm" className="text-sm">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        document.getElementById("file-upload")?.click();
+                      }}
+                    >
                       Procurar e selecionar arquivo
                     </Button>
                     <p className="text-xs text-gray-400">Tamanho max: 10MB</p>
@@ -410,10 +406,14 @@ export function UploadDocumentDialog({
                       </div>
                     </div>
                   </div>
-                  <div className="">
+                  <div>
                     <Button
+                      type="button"
                       variant="link"
-                      onClick={() => setPreviewOpen(true)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPreviewOpen(true);
+                      }}
                       className="text-sm text-green-500 hover:text-green-700 p-0 h-auto font-normal"
                     >
                       Pré-visualizar
@@ -429,6 +429,7 @@ export function UploadDocumentDialog({
               <Button
                 type="submit"
                 className="bg-green-500 hover:bg-green-600 text-white flex justify-center items-center gap-2 order-1 md:order-2"
+                disabled={isUploading}
                 onClick={handleSubmit(onSubmit)}
               >
                 Criar documento

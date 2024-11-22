@@ -87,6 +87,12 @@ export default function Home() {
     setSearchValue("");
   };
 
+  const handleDeleteDocument = (deletedId: string) => {
+    setDocuments((prevDocuments) =>
+      prevDocuments.filter((doc) => doc.id !== deletedId)
+    );
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header
@@ -125,7 +131,10 @@ export default function Home() {
                 onOriginChange={setOrigin}
                 onTypeChange={setType}
               />
-              <Table documents={documents} />
+              <Table
+                documents={documents}
+                onDeleteDocument={handleDeleteDocument}
+              />
             </div>
           </div>
         </main>

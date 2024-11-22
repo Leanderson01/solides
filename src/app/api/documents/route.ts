@@ -152,3 +152,16 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  if (!id) {
+    return NextResponse.json(
+      { error: "ID do documento não fornecido" },
+      { status: 400 }
+    );
+  }
+  await prisma.document.delete({ where: { id } });
+  return NextResponse.json({ message: "Documento deletado com sucesso" });
+}
