@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
@@ -39,6 +39,7 @@ export function UploadDocumentDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedSize, setUploadedSize] = useState(0);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -114,6 +115,8 @@ export function UploadDocumentDialog({
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -137,6 +140,8 @@ export function UploadDocumentDialog({
     } catch (error) {
       console.error("Erro ao enviar documento:", error);
       toast.error("Erro ao criar documento");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -420,11 +425,20 @@ export function UploadDocumentDialog({
               <Button
                 type="submit"
                 className="bg-green-500 hover:bg-green-600 text-white flex justify-center items-center gap-2 order-1 md:order-2"
-                disabled={isUploading}
+                disabled={isUploading || isSubmitting}
                 onClick={handleSubmit(onSubmit)}
               >
-                Criar documento
-                <ArrowRight className="w-4 h-4" />
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Criando...
+                  </>
+                ) : (
+                  <>
+                    Criar documento
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </Button>
               <Button
                 type="button"
