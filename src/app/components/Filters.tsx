@@ -18,12 +18,14 @@ import {
 } from "@/components/ui/tooltip";
 import { useState } from "react";
 import { UploadDocumentDialog } from "@/components/upload-document-dialog";
+import { FiltersSkeleton } from "./FiltersSkeleton";
 
 interface FiltersProps {
   origin: string;
   type: string;
   onOriginChange: (value: string) => void;
   onTypeChange: (value: string) => void;
+  isLoading?: boolean;
 }
 
 export default function Filters({
@@ -31,8 +33,13 @@ export default function Filters({
   type,
   onOriginChange,
   onTypeChange,
+  isLoading = false,
 }: FiltersProps) {
   const [open, setOpen] = useState(false);
+
+  if (isLoading) {
+    return <FiltersSkeleton />;
+  }
 
   return (
     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">

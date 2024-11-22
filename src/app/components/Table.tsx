@@ -19,6 +19,7 @@ import { useTablet } from "@/hooks/use-tablet";
 import { Document } from "@prisma/client";
 import { toast } from "sonner";
 import { PreviewDocumentDialog } from "@/components/preview-document-dialog";
+import { TableSkeleton } from "./TableSkeleton";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -47,13 +48,17 @@ const cleanNumberString = (value: string): number => {
   return parseFloat(cleanValue) || 0;
 };
 
+interface TableProps {
+  documents: Document[];
+  onDeleteDocument: (id: string) => void;
+  isLoading?: boolean;
+}
+
 export default function Table({
   documents,
   onDeleteDocument,
-}: {
-  documents: Document[];
-  onDeleteDocument: (id: string) => void;
-}) {
+  isLoading = false,
+}: TableProps) {
   const isMobile = useMobile();
   const isTablet = useTablet();
 
@@ -182,6 +187,10 @@ export default function Table({
     setPreviewUrl(previewUrl);
     setIsPreviewOpen(true);
   };
+
+  if (isLoading) {
+    return <TableSkeleton />;
+  }
 
   return (
     <>

@@ -21,6 +21,7 @@ export default function Home() {
   const [origin, setOrigin] = useState("all");
   const [type, setType] = useState("all");
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { date, documentType, emitter, tributeValue, liquidValue } =
     useFilterStore();
@@ -32,6 +33,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchDocuments = async () => {
+      setIsLoading(true);
       try {
         const searchParams = new URLSearchParams();
         if (searchValue) {
@@ -76,6 +78,8 @@ export default function Home() {
         }
       } catch (error) {
         console.error("Erro ao buscar documentos:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchDocuments();
@@ -139,10 +143,12 @@ export default function Home() {
                 type={type}
                 onOriginChange={setOrigin}
                 onTypeChange={setType}
+                isLoading={isLoading}
               />
               <Table
                 documents={documents}
                 onDeleteDocument={handleDeleteDocument}
+                isLoading={isLoading}
               />
             </div>
           </div>
