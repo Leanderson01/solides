@@ -9,6 +9,11 @@ export async function GET(request: Request) {
     const search = searchParams.get("search");
     const type = searchParams.get("type");
     const origin = searchParams.get("origin");
+    const date = searchParams.get("date");
+    const documentType = searchParams.get("documentType");
+    const emitter = searchParams.get("emitter");
+    const tributeValue = searchParams.get("tributeValue");
+    const liquidValue = searchParams.get("liquidValue");
 
     const whereClause: Prisma.DocumentWhereInput = {
       AND: [
@@ -26,8 +31,26 @@ export async function GET(request: Request) {
               ],
             }
           : {},
-        type ? { type } : {},
-        origin ? { origin } : {},
+        type && type !== "all" ? { type } : {},
+        origin && origin !== "all" ? { origin } : {},
+        date
+          ? {
+              createdAt: {
+                gte: new Date(date),
+                lt: new Date(
+                  new Date(date).setDate(new Date(date).getDate() + 1)
+                ),
+              },
+            }
+          : {},
+        documentType && documentType !== "all" ? { type: documentType } : {},
+        emitter ? { emitter: { contains: emitter, mode: "insensitive" } } : {},
+        tributeValue
+          ? { tributeValue: { contains: tributeValue, mode: "insensitive" } }
+          : {},
+        liquidValue
+          ? { liquidValue: { contains: liquidValue, mode: "insensitive" } }
+          : {},
       ],
     };
 
@@ -38,7 +61,17 @@ export async function GET(request: Request) {
       },
     });
 
-    if (documents.length === 0 && !search && !type && !origin) {
+    if (
+      documents.length === 0 &&
+      !search &&
+      !type &&
+      !origin &&
+      !date &&
+      !documentType &&
+      !emitter &&
+      !tributeValue &&
+      !liquidValue
+    ) {
       const sampleDocuments = [
         {
           name: "Contrato de Serviço",
@@ -106,13 +139,10 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-
     const validatedData = documentSchema.parse(data);
-
     const document = await prisma.document.create({
       data: validatedData,
     });
-
     return NextResponse.json(document);
   } catch (error) {
     console.error("Erro ao criar documento:", error);

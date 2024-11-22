@@ -24,16 +24,32 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
+import { useFilterStore } from "@/store/use-filter-store";
+import { formatDate } from "date-fns";
 
 type FilterDrawerProps = {
   children: React.ReactNode;
 };
 
 export function FilterDrawer({ children }: FilterDrawerProps) {
+  const {
+    date,
+    documentType,
+    emitter,
+    tributeValue,
+    liquidValue,
+    setDate,
+    setDocumentType,
+    setEmitter,
+    setTributeValue,
+    setLiquidValue,
+    clearFilters,
+  } = useFilterStore();
+
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent overlay className="w-full md:max-w-[440px] z-[999]">
+      <SheetContent overlay className="w-full md:max-w-[440px]">
         <SheetHeader>
           <SheetTitle>Filtrar documentos</SheetTitle>
           <p className="text-sm text-gray-500">
@@ -63,11 +79,18 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  Selecionar período
+                  {date
+                    ? formatDate(new Date(date), "dd/MM/yyyy")
+                    : "Selecionar período"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <Calendar mode="single" locale={ptBR} />
+                <Calendar
+                  mode="single"
+                  selected={date ? new Date(date) : undefined}
+                  onSelect={(newDate) => setDate(newDate?.toISOString() || "")}
+                  locale={ptBR}
+                />
               </PopoverContent>
             </Popover>
           </div>
@@ -76,14 +99,14 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
             <label className="text-sm font-bold mb-2 block">
               Tipo de documento
             </label>
-            <Select>
+            <Select value={documentType} onValueChange={setDocumentType}>
               <SelectTrigger className="h-10">
-                <SelectValue placeholder="Nota fiscal de serviço" />
+                <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem className="h-10" value="nfs">
-                  Nota fiscal de serviço
-                </SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="nfs">Nota fiscal de serviço</SelectItem>
+                <SelectItem value="contrato">Contrato</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -93,6 +116,8 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
               <Input
                 className="h-10 placeholder:text-[#9CA3AF]"
                 placeholder="Razão social do emitente"
+                value={emitter}
+                onChange={(e) => setEmitter(e.target.value)}
               />
             </div>
 
@@ -103,6 +128,8 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
               <Input
                 className="h-10 placeholder:text-[#9CA3AF]"
                 placeholder="Valor em R$"
+                value={tributeValue}
+                onChange={(e) => setTributeValue(e.target.value)}
               />
             </div>
 
@@ -113,19 +140,20 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
               <Input
                 className="h-10 placeholder:text-[#9CA3AF]"
                 placeholder="Valor em R$"
+                value={liquidValue}
+                onChange={(e) => setLiquidValue(e.target.value)}
               />
             </div>
           </div>
 
           <div className="flex gap-2 justify-end">
             <SheetClose asChild>
-              <Button variant="outline">Limpar</Button>
+              <Button variant="outline" onClick={clearFilters}>
+                Limpar
+              </Button>
             </SheetClose>
             <SheetClose asChild>
-              <Button
-                className="bg-[#22C55E] hover:bg-[#16A34A] text-white"
-                disabled
-              >
+              <Button className="bg-[#22C55E] hover:bg-[#16A34A] text-white">
                 Aplicar filtro
               </Button>
             </SheetClose>

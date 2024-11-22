@@ -12,6 +12,7 @@ import Table from "./components/Table";
 import Footer from "./components/Footer";
 import SearchDocuments from "./components/SearchDocuments";
 import { AddNewDocument } from "./components/AddNewDocument";
+import { useFilterStore } from "@/store/use-filter-store";
 
 export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -19,6 +20,10 @@ export default function Home() {
   const [origin, setOrigin] = useState("all");
   const [type, setType] = useState("all");
   const [documents, setDocuments] = useState<Document[]>([]);
+
+  const { date, documentType, emitter, tributeValue, liquidValue } =
+    useFilterStore();
+
   const isMobile = useMobile();
   const isTablet = useTablet();
 
@@ -36,6 +41,22 @@ export default function Home() {
           searchParams.append("type", type);
         }
 
+        if (date) {
+          searchParams.append("date", date);
+        }
+        if (documentType !== "all") {
+          searchParams.append("documentType", documentType);
+        }
+        if (emitter) {
+          searchParams.append("emitter", emitter);
+        }
+        if (tributeValue) {
+          searchParams.append("tributeValue", tributeValue);
+        }
+        if (liquidValue) {
+          searchParams.append("liquidValue", liquidValue);
+        }
+
         const response = await fetch(
           `/api/documents?${searchParams.toString()}`
         );
@@ -51,7 +72,16 @@ export default function Home() {
       }
     };
     fetchDocuments();
-  }, [searchValue, origin, type]);
+  }, [
+    searchValue,
+    origin,
+    type,
+    date,
+    documentType,
+    emitter,
+    tributeValue,
+    liquidValue,
+  ]);
 
   const handleClearSearch = () => {
     setSearchValue("");
