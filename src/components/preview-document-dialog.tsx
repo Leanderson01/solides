@@ -154,15 +154,35 @@ export function PreviewDocumentDialog({
         </div>
 
         <div className="flex-1 overflow-auto bg-gray-100 p-4">
-          <div className="flex justify-center">
-            <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
-              <Page pageNumber={pageNumber} scale={scale} />
+          <div className="flex justify-center min-h-full">
+            <Document
+              file={pdfUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              options={{
+                cMapUrl:
+                  "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/cmaps/",
+                cMapPacked: true,
+                standardFontDataUrl:
+                  "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/standard_fonts/",
+              }}
+            >
+              <Page
+                pageNumber={pageNumber}
+                scale={scale}
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+              />
             </Document>
           </div>
         </div>
 
         <div className="flex-none p-4 flex justify-end border-t bg-white">
-          <Button onClick={() => onOpenChange(false)}>Fechar</Button>
+          <Button
+            onClick={() => onOpenChange(false)}
+            className="bg-green-500 text-white hover:bg-green-600"
+          >
+            Fechar
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
