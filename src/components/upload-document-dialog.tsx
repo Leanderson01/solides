@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -29,29 +29,38 @@ export function UploadDocumentDialog({
   const [documentType, setDocumentType] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadedSize, setUploadedSize] = useState(0);
 
-  useEffect(() => {
-    if (file && !isUploading) {
-      setIsUploading(true);
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        setUploadProgress(progress);
+  const simulateUpload = (file: File) => {
+    setIsUploading(true);
+    setUploadedSize(0);
+    setUploadProgress(0);
+
+    const totalSize = file.size;
+    const interval = setInterval(() => {
+      setUploadedSize((current) => {
+        const newSize = current + totalSize * 0.1;
+        const progress = (newSize / totalSize) * 100;
+
+        setUploadProgress(Math.min(progress, 100));
+
         if (progress >= 100) {
           clearInterval(interval);
           setIsUploading(false);
+          return totalSize;
         }
-      }, 200);
+        return newSize;
+      });
+    }, 500);
 
-      return () => clearInterval(interval);
-    }
-  }, [file, isUploading]);
+    return () => clearInterval(interval);
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile && selectedFile.size <= 10 * 1024 * 1024) {
       setFile(selectedFile);
-      setUploadProgress(0);
+      simulateUpload(selectedFile);
     } else {
       alert("O arquivo deve ter no máximo 10MB");
     }
@@ -62,7 +71,7 @@ export function UploadDocumentDialog({
     const droppedFile = event.dataTransfer.files[0];
     if (droppedFile && droppedFile.size <= 10 * 1024 * 1024) {
       setFile(droppedFile);
-      setUploadProgress(0);
+      simulateUpload(droppedFile);
     } else {
       alert("O arquivo deve ter no máximo 10MB");
     }
@@ -71,11 +80,16 @@ export function UploadDocumentDialog({
   const handleRemoveFile = () => {
     setFile(null);
     setUploadProgress(0);
+    setUploadedSize(0);
     setIsUploading(false);
   };
 
   const handleSubmit = async () => {
     onOpenChange(false);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    return `${(bytes / (1024 * 1024)).toFixed(1)}`;
   };
 
   return (
@@ -173,13 +187,20 @@ export function UploadDocumentDialog({
                           height={0}
                           className="bg-gray-100 rounded-full p-3 h-12 w-12"
                         />
-                        <div className="flex items-start flex-col gap-1">
+                        <div className="flex items-start w-full flex-col gap-1">
                           <span className="text-sm text-gray-700">
                             {file.name}
                           </span>
                           <span className="text-xs text-gray-500">
-                            {(file.size / (1024 * 1024)).toFixed(1)} MB
+                            {formatFileSize(uploadedSize)} de{" "}
+                            {formatFileSize(file.size)}MB
                           </span>
+                          <div className="flex items-center w-full gap-2">
+                            <Progress
+                              value={uploadProgress}
+                              className="flex-1 w-full"
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="flex justify-end">
@@ -191,9 +212,6 @@ export function UploadDocumentDialog({
                         </button>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Progress value={uploadProgress} className="flex-1" />
                   </div>
                 </div>
                 <div className="">
@@ -213,9 +231,7 @@ export function UploadDocumentDialog({
           <div className="flex flex-col md:flex-row md:justify-end gap-2 md:gap-4">
             <Button
               onClick={handleSubmit}
-              disabled={
-                !file || isUploading || !documentOrigin || !documentType
-              }
+              disabled={!file || isUploading}
               className="bg-green-500 hover:bg-green-600 text-white flex justify-center items-center gap-2 order-1 md:order-2 disabled:opacity-50"
             >
               Criar documento
