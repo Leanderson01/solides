@@ -165,7 +165,6 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    console.log("Arquivo recebido:", file.name, file.size);
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
@@ -189,8 +188,6 @@ export async function POST(request: Request) {
       }
     );
 
-    console.log("Upload Cloudinary bem sucedido:", result.secure_url);
-
     const data = JSON.parse(formData.get("data") as string);
 
     const validatedData = documentSchema.parse({
@@ -202,8 +199,6 @@ export async function POST(request: Request) {
     const document = await prisma.document.create({
       data: validatedData,
     });
-
-    console.log("Documento salvo com URL:", document.fileUrl);
 
     return NextResponse.json(document);
   } catch (error) {

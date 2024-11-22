@@ -182,12 +182,6 @@ export default function Table({
   };
 
   const handlePreviewDocument = (doc: Document) => {
-    console.log("Documento para preview:", {
-      id: doc.id,
-      name: doc.name,
-      url: doc.fileUrl,
-    });
-
     const previewUrl = doc.fileUrl.replace("image/upload", "raw/upload");
 
     setPreviewUrl(previewUrl);

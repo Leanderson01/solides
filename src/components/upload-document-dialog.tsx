@@ -134,9 +134,6 @@ export function UploadDocumentDialog({
         throw new Error(errorData.error || "Erro ao criar documento");
       }
 
-      const responseData = await response.json();
-      console.log("Resposta do servidor:", responseData);
-
       toast.success("Documento adicionado com sucesso!");
       setShouldRefetch(true);
       onOpenChange(false);

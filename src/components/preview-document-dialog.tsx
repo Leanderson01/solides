@@ -41,7 +41,6 @@ export function PreviewDocumentDialog({
   useEffect(() => {
     if (open) {
       setError(null);
-      console.log("URL do documento:", documentUrl);
     }
   }, [open, documentUrl]);
 
