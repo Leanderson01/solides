@@ -16,8 +16,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useState } from "react";
+import { UploadDocumentDialog } from "@/components/upload-document-dialog";
 
 export default function Filters() {
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
       <div className="flex flex-col md:flex-row gap-4">
@@ -88,12 +92,16 @@ export default function Filters() {
           </Select>
         </div>
       </div>
-      <Button className="bg-green-500 hover:bg-green-600 w-40 h-10 text-white font-medium lg:block hidden">
+      <Button
+        className="bg-green-500 hover:bg-green-600 w-40 h-10 text-white font-medium lg:block hidden"
+        onClick={() => setOpen(true)}
+      >
         <div className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Novo documento
         </div>
       </Button>
+      <UploadDocumentDialog open={open} onOpenChange={setOpen} />
     </div>
   );
 }

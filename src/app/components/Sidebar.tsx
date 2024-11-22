@@ -39,18 +39,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               />
             </SheetTitle>
           </SheetHeader>
-          {/* <div className="flex flex-col h-full py-4">
-            <div className="px-3 py-2">
-              <div className="space-y-1">
-                <SidebarItem
-                  icon="/file-side.svg"
-                  title="Documentos"
-                  isActive={true}
-                  isOpen={true}
-                />
-              </div>
-            </div>
-          </div> */}
         </SheetContent>
       </Sheet>
     );
