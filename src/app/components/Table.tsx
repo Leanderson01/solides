@@ -16,90 +16,7 @@ import {
 import Image from "next/image";
 import { useMobile } from "@/hooks/use-mobile";
 import { useTablet } from "@/hooks/use-tablet";
-
-const data = [
-  {
-    code: "Cód. 0000",
-    name: "Nome do documento",
-    emitente: "Courtney Henry",
-    valorTributos: "R$200,00",
-    valorLiquido: "R$2.000,00",
-    dataCriacao: "12 de abril 2024",
-    ultimaAtualizacao: "12 de abril 2024",
-  },
-  {
-    code: "Cód. 0000",
-    name: "Nome do documento",
-    emitente: "Theresa Webb",
-    valorTributos: "R$200,00",
-    valorLiquido: "R$2.000,00",
-    dataCriacao: "12 de abril 2024",
-    ultimaAtualizacao: "12 de abril 2024",
-  },
-  {
-    code: "Cód. 0000",
-    name: "Nome do documento",
-    emitente: "Kristin Watson",
-    valorTributos: "R$200,00",
-    valorLiquido: "R$2.000,00",
-    dataCriacao: "12 de abril 2024",
-    ultimaAtualizacao: "12 de abril 2024",
-  },
-  {
-    code: "Cód. 0000",
-    name: "Nome do documento",
-    emitente: "Jacob Jones",
-    valorTributos: "R$200,00",
-    valorLiquido: "R$2.000,00",
-    dataCriacao: "12 de abril 2024",
-    ultimaAtualizacao: "12 de abril 2024",
-  },
-  {
-    code: "Cód. 0000",
-    name: "Nome do documento",
-    emitente: "Jacob Jones",
-    valorTributos: "R$200,00",
-    valorLiquido: "R$2.000,00",
-    dataCriacao: "12 de abril 2024",
-    ultimaAtualizacao: "12 de abril 2024",
-  },
-  {
-    code: "Cód. 0000",
-    name: "Nome do documento",
-    emitente: "Arlene McCoy",
-    valorTributos: "R$200,00",
-    valorLiquido: "R$2.000,00",
-    dataCriacao: "12 de abril 2024",
-    ultimaAtualizacao: "12 de abril 2024",
-  },
-  {
-    code: "Cód. 0000",
-    name: "Nome do documento",
-    emitente: "Bessie Cooper",
-    valorTributos: "R$200,00",
-    valorLiquido: "R$2.000,00",
-    dataCriacao: "12 de abril 2024",
-    ultimaAtualizacao: "12 de abril 2024",
-  },
-  {
-    code: "Cód. 0000",
-    name: "Nome do documento",
-    emitente: "Jerome Bell",
-    valorTributos: "R$200,00",
-    valorLiquido: "R$2.000,00",
-    dataCriacao: "12 de abril 2024",
-    ultimaAtualizacao: "12 de abril 2024",
-  },
-  {
-    code: "Cód. 0000",
-    name: "Nome do documento",
-    emitente: "Esther Howard",
-    valorTributos: "R$200,00",
-    valorLiquido: "R$2.000,00",
-    dataCriacao: "12 de abril 2024",
-    ultimaAtualizacao: "12 de abril 2024",
-  },
-];
+import { Document } from "@prisma/client";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -110,7 +27,26 @@ type SortField =
   | "dataCriacao"
   | "ultimaAtualizacao";
 
-export default function Table() {
+const formatDate = (dateString: string | Date): string => {
+  try {
+    return new Date(dateString).toLocaleDateString();
+  } catch (error) {
+    console.error("Invalid date:", dateString);
+    return error as string;
+  }
+};
+
+const cleanNumberString = (value: string): number => {
+  // Remove R$, espaços e converte vírgula para ponto
+  const cleanValue = value
+    .replace("R$", "")
+    .replace(/\s/g, "")
+    .replace(".", "")
+    .replace(",", ".");
+  return parseFloat(cleanValue) || 0; // retorna 0 se o parseFloat resultar em NaN
+};
+
+export default function Table({ documents }: { documents: Document[] }) {
   const isMobile = useMobile();
   const isTablet = useTablet();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -129,13 +65,11 @@ export default function Table() {
   const handleSort = (field: SortField) => {
     setSortDirections((prev) => {
       const newDirections = { ...prev };
-      // Reset all other fields
       Object.keys(newDirections).forEach((key) => {
         if (key !== field) {
           newDirections[key as SortField] = null;
         }
       });
-      // Toggle current field
       newDirections[field] = prev[field] === "asc" ? "desc" : "asc";
       return newDirections;
     });
@@ -171,7 +105,7 @@ export default function Table() {
     );
   };
 
-  const sortedData = [...data].sort((a, b) => {
+  const sortedData = [...documents].sort((a, b) => {
     const direction = sortDirections[sortField];
     if (!direction) return 0;
 
@@ -181,30 +115,27 @@ export default function Table() {
       case "name":
         return multiplier * a.name.localeCompare(b.name);
       case "emitente":
-        return multiplier * a.emitente.localeCompare(b.emitente);
+        return multiplier * a.origin.localeCompare(b.origin);
       case "valorTributos":
         return (
           multiplier *
-          (parseFloat(a.valorTributos.replace(/[^0-9.-]+/g, "")) -
-            parseFloat(b.valorTributos.replace(/[^0-9.-]+/g, "")))
+          (cleanNumberString(a.tributeValue) -
+            cleanNumberString(b.tributeValue))
         );
       case "valorLiquido":
         return (
           multiplier *
-          (parseFloat(a.valorLiquido.replace(/[^0-9.-]+/g, "")) -
-            parseFloat(b.valorLiquido.replace(/[^0-9.-]+/g, "")))
+          (cleanNumberString(a.liquidValue) - cleanNumberString(b.liquidValue))
         );
       case "dataCriacao":
         return (
           multiplier *
-          (new Date(a.dataCriacao).getTime() -
-            new Date(b.dataCriacao).getTime())
+          (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
         );
       case "ultimaAtualizacao":
         return (
           multiplier *
-          (new Date(a.ultimaAtualizacao).getTime() -
-            new Date(b.ultimaAtualizacao).getTime())
+          (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime())
         );
       default:
         return 0;
@@ -254,13 +185,13 @@ export default function Table() {
                       <input
                         type="checkbox"
                         className="rounded border-gray-300"
-                        checked={selectedItems.includes(doc.code)}
+                        checked={selectedItems.includes(doc.id)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedItems([...selectedItems, doc.code]);
+                            setSelectedItems([...selectedItems, doc.id]);
                           } else {
                             setSelectedItems(
-                              selectedItems.filter((item) => item !== doc.code)
+                              selectedItems.filter((item) => item !== doc.id)
                             );
                           }
                         }}
@@ -277,18 +208,16 @@ export default function Table() {
                         className="mr-2"
                       />
                       <div className="flex flex-col">
-                        <span className="text-xs text-gray-500">
-                          {doc.code}
-                        </span>
+                        <span className="text-xs text-gray-500">{doc.id}</span>
                         <span className="text-sm">{doc.name}</span>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4">{doc.emitente}</td>
-                  <td className="py-3 px-4">{doc.valorTributos}</td>
-                  <td className="py-3 px-4">{doc.valorLiquido}</td>
-                  <td className="py-3 px-4">{doc.dataCriacao}</td>
-                  <td className="py-3 px-4">{doc.ultimaAtualizacao}</td>
+                  <td className="py-3 px-4">{doc.origin}</td>
+                  <td className="py-3 px-4">{doc.tributeValue}</td>
+                  <td className="py-3 px-4">{doc.liquidValue}</td>
+                  <td className="py-3 px-4">{formatDate(doc.createdAt)}</td>
+                  <td className="py-3 px-4">{formatDate(doc.updatedAt)}</td>
                   <td className="py-3 px-4 relative">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -317,25 +246,48 @@ export default function Table() {
                   <td colSpan={2} className="py-3 px-4">
                     <div className="flex flex-col">
                       <span className="text-gray-500">Total</span>
-                      <span>9 documentos</span>
+                      <span>{documents.length} documentos</span>
                     </div>
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex flex-col">
                       <span className="text-gray-500">nº de emitentes</span>
-                      <span>8 emitentes</span>
+                      <span>
+                        {new Set(documents.map((doc) => doc.origin)).size}{" "}
+                        emitentes
+                      </span>
                     </div>
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex flex-col">
                       <span className="text-gray-500">Total de tributos</span>
-                      <span>R$1.800,00</span>
+                      <span>
+                        {`R$ ${documents
+                          .reduce(
+                            (acc, doc) =>
+                              acc + cleanNumberString(doc.tributeValue),
+                            0
+                          )
+                          .toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                          })}`}
+                      </span>
                     </div>
                   </td>
                   <td colSpan={4} className="py-3 px-4">
                     <div className="flex flex-col">
                       <span className="text-gray-500">Total valor líquido</span>
-                      <span>R$18.000,00</span>
+                      <span>
+                        {`R$ ${documents
+                          .reduce(
+                            (acc, doc) =>
+                              acc + cleanNumberString(doc.liquidValue),
+                            0
+                          )
+                          .toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                          })}`}
+                      </span>
                     </div>
                   </td>
                 </tr>
@@ -345,7 +297,9 @@ export default function Table() {
         </div>
       </div>
       <div className="flex items-center justify-end gap-4 text-sm text-gray-500 mt-4">
-        <span className="text-gray-400 hidden lg:block">09 de 100</span>
+        <span className="text-gray-400 hidden lg:block">
+          {documents.length} de {documents.length}
+        </span>
         <div className="flex gap-4 w-full lg:w-auto ">
           <Button
             variant="outline"

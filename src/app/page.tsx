@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMobile } from "@/hooks/use-mobile";
 import { useTablet } from "@/hooks/use-tablet";
+import { Document } from "@prisma/client";
 
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -15,8 +16,35 @@ import { AddNewDocument } from "./components/AddNewDocument";
 export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [documents, setDocuments] = useState<Document[]>([]);
   const isMobile = useMobile();
   const isTablet = useTablet();
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const searchParams = new URLSearchParams();
+        if (searchValue) {
+          searchParams.append("search", searchValue);
+        }
+
+        const response = await fetch(
+          `/api/documents?${searchParams.toString()}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Erro ao buscar documentos");
+        }
+
+        const data = await response.json();
+        setDocuments(data);
+      } catch (error) {
+        console.error("Erro ao buscar documentos:", error);
+      } finally {
+      }
+    };
+    fetchDocuments();
+  }, [searchValue]);
 
   const handleClearSearch = () => {
     setSearchValue("");
@@ -55,7 +83,7 @@ export default function Home() {
               </div>
               <div className="w-full h-px bg-gray-200 my-6" />
               <Filters />
-              <Table />
+              <Table documents={documents} />
             </div>
           </div>
         </main>
