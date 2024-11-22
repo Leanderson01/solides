@@ -10,7 +10,16 @@ import {
 export default function UserMenu() {
   return (
     <div className="flex items-center space-x-4">
-      <Bell className="w-5 h-5 text-gray-600 cursor-pointer hidden md:block" />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Bell className="w-5 h-5 text-gray-600 cursor-pointer hidden md:block" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem className="text-gray-600">
+            Sem notificações
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 border border-[#E5E6EA] rounded-md">
