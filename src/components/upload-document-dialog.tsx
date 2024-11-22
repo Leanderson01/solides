@@ -175,7 +175,7 @@ export function UploadDocumentDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-full h-full overflow-y-auto max-h-[90vh]">
+        <DialogContent className="w-full h-full overflow-y-auto max-h-[100vh]">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4"

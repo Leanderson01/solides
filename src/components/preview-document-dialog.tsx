@@ -9,6 +9,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
+import { useMobile } from "@/hooks/use-mobile";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.6.172/pdf.worker.min.js`;
 
@@ -25,9 +26,10 @@ export function PreviewDocumentDialog({
   file,
   fileUrl,
 }: PreviewDocumentDialogProps) {
+  const isMobile = useMobile();
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1.0);
+  const [scale, setScale] = useState(isMobile ? 0.5 : 1.0);
   const [error, setError] = useState<string | null>(null);
 
   const documentUrl = file
@@ -69,7 +71,7 @@ export function PreviewDocumentDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-10xl w-[95vw] p-0 h-[90vh] bg-white flex flex-col"
+        className="max-w-10xl w-full md:w-[95vw] p-0 h-[100vh] bg-white flex flex-col"
         isPreview
       >
         <div className="flex-none">
