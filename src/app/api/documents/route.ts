@@ -159,8 +159,10 @@ export async function POST(request: Request) {
         cloudinary.uploader
           .upload_stream(
             {
-              resource_type: "auto",
+              resource_type: "raw",
               folder: "solides-documents",
+              upload_preset: "ml_default",
+              access_mode: "public",
             },
             (error, result) => {
               if (error) reject(error);

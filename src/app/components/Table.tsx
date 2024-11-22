@@ -177,9 +177,7 @@ export default function Table({
       url: doc.fileUrl,
     });
 
-    const previewUrl = doc.fileUrl.startsWith("http")
-      ? doc.fileUrl
-      : `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/raw/upload/${doc.fileUrl}`;
+    const previewUrl = doc.fileUrl.replace("image/upload", "raw/upload");
 
     setPreviewUrl(previewUrl);
     setIsPreviewOpen(true);
