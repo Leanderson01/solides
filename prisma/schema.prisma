@@ -12,6 +12,7 @@ model Document {
     name         String
     origin       String   @default("interno")
     type         String   @default("contrato")
+    emitter      String   @default("Solides")
     tributeValue String   @default("R$ 0,00")
     liquidValue  String   @default("R$ 0,00")
     fileUrl      String   @default("/files/default.pdf")

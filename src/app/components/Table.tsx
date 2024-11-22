@@ -37,13 +37,12 @@ const formatDate = (dateString: string | Date): string => {
 };
 
 const cleanNumberString = (value: string): number => {
-  // Remove R$, espaços e converte vírgula para ponto
   const cleanValue = value
     .replace("R$", "")
     .replace(/\s/g, "")
     .replace(".", "")
     .replace(",", ".");
-  return parseFloat(cleanValue) || 0; // retorna 0 se o parseFloat resultar em NaN
+  return parseFloat(cleanValue) || 0;
 };
 
 export default function Table({ documents }: { documents: Document[] }) {
@@ -115,7 +114,7 @@ export default function Table({ documents }: { documents: Document[] }) {
       case "name":
         return multiplier * a.name.localeCompare(b.name);
       case "emitente":
-        return multiplier * a.origin.localeCompare(b.origin);
+        return multiplier * a.emitter.localeCompare(b.emitter);
       case "valorTributos":
         return (
           multiplier *
@@ -213,7 +212,7 @@ export default function Table({ documents }: { documents: Document[] }) {
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4">{doc.origin}</td>
+                  <td className="py-3 px-4">{doc.emitter}</td>
                   <td className="py-3 px-4">{doc.tributeValue}</td>
                   <td className="py-3 px-4">{doc.liquidValue}</td>
                   <td className="py-3 px-4">{formatDate(doc.createdAt)}</td>
@@ -253,7 +252,7 @@ export default function Table({ documents }: { documents: Document[] }) {
                     <div className="flex flex-col">
                       <span className="text-gray-500">nº de emitentes</span>
                       <span>
-                        {new Set(documents.map((doc) => doc.origin)).size}{" "}
+                        {new Set(documents.map((doc) => doc.emitter)).size}{" "}
                         emitentes
                       </span>
                     </div>

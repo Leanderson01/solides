@@ -37,7 +37,7 @@ export default function Home() {
         }
 
         const data = await response.json();
-        setDocuments(data);
+        setDocuments(data.documents);
       } catch (error) {
         console.error("Erro ao buscar documentos:", error);
       } finally {

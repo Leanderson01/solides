@@ -35,18 +35,6 @@ export async function GET(request: Request) {
       orderBy: {
         createdAt: "desc",
       },
-      select: {
-        id: true,
-        name: true,
-        origin: true,
-        type: true,
-        tributeValue: true,
-        liquidValue: true,
-        fileUrl: true,
-        fileSize: true,
-        createdAt: true,
-        updatedAt: true,
-      },
     });
 
     if (documents.length === 0 && !search && !type && !origin) {
@@ -55,6 +43,7 @@ export async function GET(request: Request) {
           name: "Contrato de Serviço",
           origin: "interno",
           type: "contrato",
+          emitter: "Solides",
           tributeValue: "R$ 500,00",
           liquidValue: "R$ 5.000,00",
           fileUrl: "/files/contrato.pdf",
@@ -64,6 +53,7 @@ export async function GET(request: Request) {
           name: "Nota Fiscal 001",
           origin: "externo",
           type: "nota-fiscal",
+          emitter: "Solides",
           tributeValue: "R$ 200,00",
           liquidValue: "R$ 2.000,00",
           fileUrl: "/files/nf001.pdf",
@@ -72,6 +62,8 @@ export async function GET(request: Request) {
       ];
 
       try {
+        await prisma.document.deleteMany({});
+
         await prisma.$transaction(async (tx) => {
           for (const doc of sampleDocuments) {
             await tx.document.create({
@@ -84,49 +76,27 @@ export async function GET(request: Request) {
           orderBy: {
             createdAt: "desc",
           },
-          select: {
-            id: true,
-            name: true,
-            origin: true,
-            type: true,
-            tributeValue: true,
-            liquidValue: true,
-            fileUrl: true,
-            fileSize: true,
-            createdAt: true,
-            updatedAt: true,
-          },
         });
       } catch (createError) {
         console.error("Erro ao criar documentos de exemplo:", createError);
-        throw createError;
+        return NextResponse.json(
+          { error: "Erro ao criar documentos de exemplo" },
+          { status: 500 }
+        );
       }
     }
 
-    const serializedDocuments = documents.map((doc) => ({
+    const safeDocuments = documents.map((doc) => ({
       ...doc,
-      createdAt:
-        doc.createdAt instanceof Date
-          ? doc.createdAt.toISOString()
-          : new Date(doc.createdAt).toISOString(),
-      updatedAt:
-        doc.updatedAt instanceof Date
-          ? doc.updatedAt.toISOString()
-          : new Date(doc.updatedAt).toISOString(),
+      createdAt: doc.createdAt.toISOString(),
+      updatedAt: doc.updatedAt.toISOString(),
     }));
 
-    return NextResponse.json(serializedDocuments);
-  } catch (error: unknown) {
-    console.error("Erro completo:", error);
-
-    const errorMessage =
-      error instanceof Error ? error.message : "Erro desconhecido";
-
+    return NextResponse.json({ documents: safeDocuments });
+  } catch (error) {
+    console.error("Erro na rota:", error);
     return NextResponse.json(
-      {
-        error: "Erro interno do servidor",
-        details: errorMessage,
-      },
+      { error: "Erro interno do servidor" },
       { status: 500 }
     );
   }
