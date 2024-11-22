@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,6 +8,9 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
+import { Document, Page, pdfjs } from "react-pdf";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.6.172/pdf.worker.min.js`;
 
 interface PreviewDocumentDialogProps {
   open: boolean;
@@ -22,20 +23,22 @@ export function PreviewDocumentDialog({
   onOpenChange,
   file,
 }: PreviewDocumentDialogProps) {
-  const [numPages] = useState<number>(0);
+  const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
   const [pdfUrl, setPdfUrl] = useState<string>("");
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (file) {
       const url = URL.createObjectURL(file);
       setPdfUrl(url);
-      setLoading(false);
       return () => URL.revokeObjectURL(url);
     }
   }, [file]);
+
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+  };
 
   const changePage = (offset: number) => {
     setPageNumber((prevPageNumber) => {
@@ -51,14 +54,10 @@ export function PreviewDocumentDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        className="max-w-10xl w-[95vw] p-0 h-[90vh] bg-white flex flex-col"
         isPreview
-        className="max-w-5xl w-[95vw] p-0 h-[90vh] bg-white"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex-none">
           <div className="flex items-center justify-between p-4 border-b">
             <div className="flex flex-col">
               <DialogTitle className="text-lg font-semibold">
@@ -67,7 +66,6 @@ export function PreviewDocumentDialog({
               <p className="text-sm text-gray-500">{file.name}</p>
             </div>
           </div>
-
           <div className="flex items-center justify-between p-2 border-b bg-white">
             <div className="flex items-center gap-2">
               <Button
@@ -99,7 +97,6 @@ export function PreviewDocumentDialog({
                 <option value="200">200%</option>
               </select>
             </div>
-
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -138,7 +135,6 @@ export function PreviewDocumentDialog({
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </div>
-
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -155,29 +151,18 @@ export function PreviewDocumentDialog({
               </Button>
             </div>
           </div>
+        </div>
 
-          <div className="flex-1 bg-gray-100 overflow-auto p-4">
-            <div className="flex justify-center">
-              {loading ? (
-                <div className="flex items-center justify-center h-full">
-                  <span>Carregando...</span>
-                </div>
-              ) : (
-                <div>
-                  <h1>Não foi possível carregar o documento</h1>
-                </div>
-              )}
-            </div>
+        <div className="flex-1 overflow-auto bg-gray-100 p-4">
+          <div className="flex justify-center">
+            <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
+              <Page pageNumber={pageNumber} scale={scale} />
+            </Document>
           </div>
+        </div>
 
-          <div className="p-4 flex justify-end border-t bg-white">
-            <Button
-              onClick={() => onOpenChange(false)}
-              className="bg-green-500 hover:bg-green-600 text-white"
-            >
-              Fechar
-            </Button>
-          </div>
+        <div className="flex-none p-4 flex justify-end border-t bg-white">
+          <Button onClick={() => onOpenChange(false)}>Fechar</Button>
         </div>
       </DialogContent>
     </Dialog>
