@@ -49,8 +49,15 @@ export function PreviewDocumentDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent className="max-w-5xl w-[95vw] p-0 h-[90vh] bg-white">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        isPreview
+        className="max-w-5xl w-[95vw] p-0 h-[90vh] bg-white"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b">
             <div className="flex flex-col">
