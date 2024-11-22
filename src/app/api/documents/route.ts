@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { documentSchema } from "@/lib/validations/document";
 
 export async function GET(request: Request) {
   try {
@@ -97,6 +98,26 @@ export async function GET(request: Request) {
     console.error("Erro na rota:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const data = await request.json();
+
+    const validatedData = documentSchema.parse(data);
+
+    const document = await prisma.document.create({
+      data: validatedData,
+    });
+
+    return NextResponse.json(document);
+  } catch (error) {
+    console.error("Erro ao criar documento:", error);
+    return NextResponse.json(
+      { error: "Erro ao criar documento" },
       { status: 500 }
     );
   }
