@@ -22,8 +22,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Solides",
-  description: "Solides",
+  title: "E-paper",
+  description: "E-paper",
   icons: {
     icon: "/favicon.svg",
   },
