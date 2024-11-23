@@ -14,7 +14,6 @@ export function useTablet() {
 
     window.addEventListener("resize", checkIsTablet);
 
-    // Cleanup
     return () => window.removeEventListener("resize", checkIsTablet);
   }, []);
 

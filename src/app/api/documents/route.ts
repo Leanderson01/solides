@@ -4,7 +4,6 @@ import { Prisma } from "@prisma/client";
 import { documentSchema } from "@/lib/validations/document";
 import { cloudinary } from "@/lib/cloudinary";
 
-// Interface para o resultado do Cloudinary
 interface CloudinaryUploadResult {
   secure_url: string;
   public_id: string;
@@ -66,12 +65,10 @@ export async function GET(request: Request) {
       ],
     };
 
-    // Buscar total de documentos
     const totalDocuments = await prisma.document.count({
       where: whereClause,
     });
 
-    // Buscar documentos com paginação
     let documents = await prisma.document.findMany({
       where: whereClause,
       orderBy: {
