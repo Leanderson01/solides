@@ -25,6 +25,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     return (
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent
+          overlay={false}
           side="left"
           className="w-full p-0 mt-14 border-t"
           hideCloseButton
