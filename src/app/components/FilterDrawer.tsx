@@ -87,7 +87,7 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent overlay className="w-full md:max-w-[440px]">
+      <SheetContent overlay className="w-full md:max-w-[440px] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Filtrar documentos</SheetTitle>
           <p className="text-sm text-gray-500">
