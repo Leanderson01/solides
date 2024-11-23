@@ -8,7 +8,7 @@ export function AddNewDocument() {
   return (
     <>
       <button
-        className="fixed bottom-40 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg lg:hidden"
+        className="fixed bottom-40 z-50 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg lg:hidden"
         onClick={() => setOpen(true)}
         aria-label="Adicionar novo documento"
       >
